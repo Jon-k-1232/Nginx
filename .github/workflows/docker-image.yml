@@ -24,6 +24,5 @@ jobs:
 
          - name: Build and push Docker image for Nginx
            run: |
-             cd Nginx
              docker-compose -f docker-compose.nginx.yml build
              docker-compose -f docker-compose.nginx.yml push
