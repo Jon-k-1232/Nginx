@@ -24,6 +24,6 @@ jobs:
 
       - name: Build and push Docker image for Nginx
         run: |
-          docker-compose -f docker-compose.nginx.yml build
+          docker build -t apps-server:latest -f Dockerfile .
           docker tag apps-server:latest ${{ secrets.DOCKER_USERNAME }}/nginx_image:latest
           docker push ${{ secrets.DOCKER_USERNAME }}/nginx_image:latest
