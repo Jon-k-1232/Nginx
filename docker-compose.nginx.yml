@@ -1,24 +1,27 @@
 version: '3.9'
 
 services:
-  nginx:
-    image: marine1232/nginx_image:latest
-    container_name: Apps-Server
-    environment:
-      - TZ=America/Phoenix
-    ports:
-      - '443:443'
-      - '80:80'
-    volumes:
-      - './default.conf:/etc/nginx/conf.d/default.conf'
-      - '/Users/jonkimmel/Desktop/Code/Nginx/Server_ssl:/etc/nginx/ssl'
-    restart: always
-    networks:
-      - jenkins_network
-      - ds2_network
+   nginx:
+      # image: marine1232/nginx_image:latest
+      build:
+         context: .
+         dockerfile: Dockerfile
+      container_name: Apps-Server
+      environment:
+         - TZ=America/Phoenix
+      ports:
+         - '443:443'
+         - '80:80'
+      volumes:
+         - './default.conf:/etc/nginx/conf.d/default.conf'
+         - '/Users/jonkimmel/Desktop/Code/Nginx/Server_ssl:/etc/nginx/ssl'
+      restart: always
+      networks:
+         - jenkins_network
+         - ds2_network
 
 networks:
-  jenkins_network:
-    external: true
-  ds2_network:
-    external: true
+   jenkins_network:
+      external: true
+   ds2_network:
+      external: true
