@@ -2,10 +2,10 @@ version: '3.9'
 
 services:
    nginx:
-      # image: marine1232/nginx_image:latest
-      build:
-         context: .
-         dockerfile: Dockerfile
+      image: marine1232/nginx_image:latest
+      # build:
+      #    context: .
+      #    dockerfile: Dockerfile
       container_name: Apps-Server
       environment:
          - TZ=America/Phoenix
