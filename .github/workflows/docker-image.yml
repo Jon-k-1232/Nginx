@@ -1,4 +1,4 @@
-name: Build and Deploy Docker Images
+name: Build and Deploy Nginx Docker Image
 
 on:
    push:
@@ -11,7 +11,7 @@ jobs:
 
       env:
          DOCKER_USERNAME: marine1232
-         APP_NAME: nginx_image # Ensure this is lowercase,and must match docker compose image property
+         APP_NAME: nginx_image # Ensure this is lowercase, and must match docker compose image property
 
       steps:
          - name: Checkout code
@@ -67,22 +67,40 @@ jobs:
               username: ${{ secrets.DOCKER_USERNAME }}
               password: ${{ secrets.DOCKER_PASSWORD }}
 
-         - name: Set environment variables for backend
-           run: |
-              echo "NODE_ENV=${{ secrets.NODE_ENV }}" >> .env
-              echo "DATABASE_USER=${{ secrets.DATABASE_USER }}" >> .env
-              echo "DATABASE_PASSWORD=${{ secrets.DATABASE_PASSWORD }}" >> .env
-              echo "API_TOKEN=${{ secrets.API_TOKEN }}" >> .env
-              echo "JWT_EXPIRATION=${{ secrets.JWT_EXPIRATION }}" >> .env
-              echo "NODE_PORT_PROD=${{ secrets.NODE_PORT_PROD }}" >> .env
-              echo "DB_PROD_HOST=${{ secrets.DB_PROD_HOST }}" >> .env
-              echo "FRONT_END_URL_PROD=${{ secrets.FRONT_END_URL_PROD }}" >> .env
-              echo "PRODUCTION_PDF_SAVE_LOCATION=${{ secrets.PRODUCTION_PDF_SAVE_LOCATION }}" >> .env
-              echo "HOST_IP_PROD=${{ secrets.HOST_IP_PROD }}" >> .env
-
-         - name: Build and push Docker images for backend
+         - name: Build and push Docker images for Nginx
            run: |
               docker build -t ${{ env.DOCKER_USERNAME }}/${{ env.APP_NAME }}:latest .
               docker tag ${{ env.DOCKER_USERNAME }}/${{ env.APP_NAME }}:latest ${{ env.DOCKER_USERNAME }}/${{ env.APP_NAME }}:${{ steps.get_version.outputs.current_version }}
               docker push ${{ env.DOCKER_USERNAME }}/${{ env.APP_NAME }}:latest
               docker push ${{ env.DOCKER_USERNAME }}/${{ env.APP_NAME }}:${{ steps.get_version.outputs.current_version }}
+
+   deploy:
+      needs: build
+      runs-on: self-hosted
+
+      env:
+         DOCKER_USERNAME: marine1232
+         APP_NAME: nginx_image
+
+      steps:
+         - name: Checkout code
+           uses: actions/checkout@v2
+
+         - name: Set PATH for Docker
+           run: echo "PATH=/usr/local/bin:$PATH" >> $GITHUB_ENV
+
+         - name: Print PATH
+           run: echo $PATH
+
+         - name: Login to Docker Hub
+           run: |
+              echo "${{ secrets.DOCKER_PASSWORD }}" | docker login -u "${{ secrets.DOCKER_USERNAME }}" --password-stdin
+
+         - name: Pull latest Docker image for Nginx
+           run: |
+              docker pull ${{ env.DOCKER_USERNAME }}/${{ env.APP_NAME }}:latest
+
+         - name: Run Docker Compose
+           run: |
+              docker-compose -f docker-compose.nginx.yml down
+              docker-compose -f docker-compose.nginx.yml up -d
