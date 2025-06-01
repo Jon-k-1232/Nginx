@@ -102,5 +102,5 @@ jobs:
 
          - name: Run Docker Compose
            run: |
-              docker-compose -f docker-compose.nginx.yml down
-              docker-compose -f docker-compose.nginx.yml up -d
+              docker compose -f docker-compose.nginx.yml down
+              docker compose -f docker-compose.nginx.yml up -d
