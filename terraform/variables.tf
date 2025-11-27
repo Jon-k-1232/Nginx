@@ -27,3 +27,24 @@ variable "vpc_id" {
   description = "VPC ID where resources will be deployed"
   default     = "vpc-04f4c4cf527f99b9a"
 }
+
+# Variables for importing existing VPC resources
+# These IDs should be retrieved from AWS before running terraform import
+
+variable "default_security_group_id" {
+  type        = string
+  description = "ID of the default security group in the VPC (for import)"
+  default     = ""
+}
+
+variable "main_route_table_id" {
+  type        = string
+  description = "ID of the main route table in the VPC (for import)"
+  default     = ""
+}
+
+variable "default_nacl_id" {
+  type        = string
+  description = "ID of the default network ACL in the VPC (for import)"
+  default     = ""
+}
