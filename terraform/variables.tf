@@ -18,8 +18,8 @@ variable "ecs_cluster_name" {
 
 variable "image_tag" {
   type        = string
-  description = "Docker image tag to deploy"
-  default     = "latest"
+  description = "Docker image tag to deploy (pinned to an immutable tag so ECS pulls deterministically)"
+  default     = "tls-efs-20260611-233558"
 }
 
 variable "vpc_id" {

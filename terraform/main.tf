@@ -39,15 +39,34 @@ resource "aws_ecs_task_definition" "nginx" {
   execution_role_arn    = data.aws_iam_role.ecs_execution.arn
   task_role_arn         = data.aws_iam_role.ecs_task.arn
 
+  # Shared EFS holding the auto-renewed Let's Encrypt cert (written by the
+  # certbot ECS task). Mounted read-only; nginx reads the cert from here.
+  volume {
+    name = "letsencrypt"
+    efs_volume_configuration {
+      file_system_id     = aws_efs_file_system.letsencrypt.id
+      transit_encryption = "ENABLED"
+      authorization_config {
+        access_point_id = aws_efs_access_point.letsencrypt.id
+      }
+    }
+  }
+
   container_definitions = jsonencode([
     {
       name      = "nginx"
       image     = "${data.aws_ecr_repository.nginx.repository_url}:${var.image_tag}"
       essential = true
-      memory    = 256
+      # Right-sized from 256: nginx uses ~30-50MB; this frees headroom on the
+      # single instance for the scheduled certbot task.
+      memory = 128
 
       # Host network mode doesn't use port mappings - container directly uses host ports
       # portMappings not needed in host mode
+
+      mountPoints = [
+        { sourceVolume = "letsencrypt", containerPath = "/etc/letsencrypt", readOnly = true }
+      ]
 
       logConfiguration = {
         logDriver = "awslogs"
